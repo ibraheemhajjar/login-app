@@ -1,0 +1,9 @@
+.homepage-title {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     text-align: center;
+     width: 100%;
+     height: 100%;
+     margin-top: 7rem;
+}
