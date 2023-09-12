@@ -31,9 +31,7 @@ const Signup = () => {
 
           if (response.statusCode === 201 || response.statusCode === 200) {
                toast.success(response.message, toastifyOptions);
-               setTimeout(() => {
-                    navigate("/login");
-               }, 2000);
+               navigate("/login");
           } else if (Array.isArray(response.error.message)) {
                toast.error(Object.values(response.error.message[0]).toString(), toastifyOptions);
           } else {

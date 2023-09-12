@@ -34,10 +34,10 @@ const Login = () => {
                localStorage.setItem("refreshToken", response.data.refreshToken);
 
                toast.success(response.message, toastifyOptions);
-               setTimeout(() => {
-                    dispatch(userActions.login({ accessToken: response.data.accessToken, refreshToken: response.data.refreshToken }));
-                    navigate("/private");
-               }, 1000);
+               dispatch(userActions.login());
+               dispatch(userActions.setAccessToken(response.data.accessToken));
+               dispatch(userActions.setRefreshToken(response.data.refreshToken));
+               navigate("/private");
           } else if (Array.isArray(response.error.message)) {
                toast.error(Object.values(response.error.message[0]).toString(), toastifyOptions);
           } else {

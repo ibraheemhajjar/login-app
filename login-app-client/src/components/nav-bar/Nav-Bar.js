@@ -11,10 +11,10 @@ const NavBar = () => {
      const signOut = () => {
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
-          setTimeout(() => {
-               dispatch(userActions.logout());
-               navigate("/login");
-          }, 1000);
+          dispatch(userActions.logout());
+          dispatch(userActions.setAccessToken(null));
+          dispatch(userActions.setRefreshToken(null));
+          navigate("/login");
      };
      return (
           <nav className="navbar navbar-expand-lg navbar-light bg-light">
@@ -22,7 +22,6 @@ const NavBar = () => {
                     <Link className="navbar-brand" to="/">
                          LOGIN APP
                     </Link>
-
                     <div className="collapse navbar-collapse" id="navbarNav">
                          <ul className="navbar-nav ml-auto">
                               {!isLoggedIn && (

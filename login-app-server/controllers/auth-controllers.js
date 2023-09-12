@@ -25,7 +25,7 @@ authControllers.postLogin = async (req, res, next) => {
                return next(error);
           }
           // generating tokens
-          const accessToken = jwt.sign({ email: email, userId: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: "30s" });
+          const accessToken = jwt.sign({ email: email, userId: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: "15s" });
           const refreshToken = jwt.sign({ email: email, userId: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: "14d" });
           // sending response
           res.executedSuccessfully = true;
@@ -43,18 +43,19 @@ authControllers.postLogin = async (req, res, next) => {
 };
 
 authControllers.refreshToken = async (req, res, next) => {
-     let anewAccessToken;
-     const AuthRefreshToken = req.get("Authorization")?.split(" ")[1];
-     if (!AuthRefreshToken) {
-          const error = new Error();
-          error.message = "Not Authenticated";
-          error.statusCode = 401;
-          throw error;
-     }
+     let newAccessToken;
      try {
+          const AuthRefreshToken = req.get("Authorization")?.split(" ")[1];
+          console.log(AuthRefreshToken);
+          if (!AuthRefreshToken || AuthRefreshToken === "null") {
+               const error = new Error();
+               error.message = "Not Authenticated";
+               error.statusCode = 401;
+               return next(error);
+          }
           decodedRefreshToken = jwt.verify(AuthRefreshToken, process.env.JWT_SECRET);
-          anewAccessToken = jwt.sign({ email: decodedRefreshToken.email, userId: decodedRefreshToken.userId }, process.env.JWT_SECRET, {
-               expiresIn: "30s",
+          newAccessToken = jwt.sign({ email: decodedRefreshToken.email, userId: decodedRefreshToken.userId }, process.env.JWT_SECRET, {
+               expiresIn: "15s",
           });
      } catch (err) {
           err.statusCode = 500;
@@ -62,20 +63,20 @@ authControllers.refreshToken = async (req, res, next) => {
      }
      res.executedSuccessfully = true;
      res.message = "generated new access token successfully!";
-     res.data = anewAccessToken;
+     res.data = newAccessToken;
      res.statusCode = 200;
      resHandler(null, req, res, next);
 };
 
 authControllers.postSignup = async (req, res, next) => {
      const { email, password, confirmPassword } = req.body;
-     if (password !== confirmPassword) {
-          const error = new Error();
-          error.message = "passwords do not match";
-          error.statusCode = 400;
-          return next(error);
-     }
      try {
+          if (password !== confirmPassword) {
+               const error = new Error();
+               error.message = "passwords do not match";
+               error.statusCode = 400;
+               return next(error);
+          }
           const user = await User.findOne({ email });
           if (user) {
                const error = new Error();
@@ -102,10 +103,6 @@ authControllers.postSignup = async (req, res, next) => {
      } catch (err) {
           throw err;
      }
-};
-
-authControllers.getSignOut = async (req, res, next) => {
-     res.status(302).redirect("/auth/login");
 };
 
 module.exports = authControllers;

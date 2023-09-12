@@ -6,7 +6,6 @@ import { toast, ToastContainer } from "react-toastify";
 import { userActions } from "../../store";
 
 const PrivateComponent = () => {
-     const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
      const accessToken = useSelector((state) => state.user.accessToken);
      const refreshToken = useSelector((state) => state.user.refreshToken);
      const dispatch = useDispatch();
@@ -14,55 +13,33 @@ const PrivateComponent = () => {
 
      const navigate = useNavigate();
 
-     const toastifyOptions = {
-          position: "top-right",
-          autoClose: 5000,
-          closeOnClick: true,
-          pauseOnHover: true,
-     };
-
      const fetchData = async (accessToken) => {
           const url = "http://localhost:5000/private/private1";
           const res = await fetch(url, {
                method: "GET",
                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
+                    Authorization: `Bearer ${accessToken}`,
                },
           });
           const response = await res.json();
-          if (response.statusCode !== 200) {
-               const refreshTokenResponse = await generateAccessToken(refreshToken);
-               if (refreshTokenResponse.statusCode !== 200) {
-                    toast.error(response.error.message, toastifyOptions);
-                    setTimeout(() => {
-                         navigate("/login");
-                    }, 1000);
-               } else {
-                    localStorage.setItem("accessToken", refreshTokenResponse.data);
-                    dispatch(userActions.refreshAccessToken(refreshTokenResponse.data));
-               }
-          } else {
-               dispatch(userActions.login({ accessToken:accessToken , refreshToken: refreshToken }))
+          if (response.statusCode === 200) {
+               dispatch(userActions.login());
                setData(response.data);
+               return;
           }
-     };
-
-     const checkUserLogin = () => {
-          if (!isLoggedIn) {
+          const refreshTokenResponse = await generateAccessToken(refreshToken);
+          if (refreshTokenResponse.statusCode === 200) {
+               localStorage.setItem("accessToken", refreshTokenResponse.data);
+               dispatch(userActions.login());
+               dispatch(userActions.setAccessToken(refreshTokenResponse.data));
+          } else {
                navigate("/login");
           }
      };
 
      useEffect(() => {
-          if (isLoggedIn) {
-               fetchData(accessToken);
-          }
+          fetchData(accessToken);
      }, [accessToken]);
-
-     useEffect(() => {
-          checkUserLogin();
-     }, []);
-
 
      return (
           <div>

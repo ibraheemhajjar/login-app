@@ -1,8 +1,8 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-     accessToken: localStorage.getItem("accessToken") || null,
-     refreshToken: localStorage.getItem("refreshToken") || null,
+     accessToken: localStorage.getItem("accessToken"),
+     refreshToken: localStorage.getItem("refreshToken"),
      isLoggedIn: false,
 };
 
@@ -10,16 +10,17 @@ const userSlice = createSlice({
      name: "user",
      initialState: initialState,
      reducers: {
-          login(state, action) {
+          login(state) {
                state.isLoggedIn = true;
-               state.accessToken = action.payload.accessToken;
-               state.refreshToken = action.payload.refreshToken;
           },
-          logout(state, action) {
+          logout(state) {
                state.isLoggedIn = false;
           },
-          refreshAccessToken(state, action) {
+          setAccessToken(state, action) {
                state.accessToken = action.payload;
+          },
+          setRefreshToken(state, action) {
+               state.refreshToken = action.payload;
           },
      },
 });
